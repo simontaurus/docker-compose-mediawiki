@@ -24,9 +24,17 @@ $wgSitename  = getenv( 'MW_SITE_NAME' );
 
 # Allow images and other files to be uploaded through the wiki.
 $wgEnableUploads  = getenv( 'MW_ENABLE_UPLOADS' );
+$wgFileExtensions = array( 'png', 'gif', 'jpg', 'jpeg', 'doc',
+    'xls', 'csv', 'txt', 'mpp', 'pdf', 'ppt', 'tiff', 'bmp', 'docx', 'xlsx',
+    'pptx', 'ps', 'odt', 'ods', 'odp', 'odg'
+);
 
 # Default skin: you can change the default skin. Use the internal symbolic
-# names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook', 'vector':
+# names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook', 'vector', 'chameleon':
+if ( getenv( 'MW_DEFAULT_SKIN' ) === 'chameleon' ) {
+    wfLoadExtension( 'Bootstrap' );
+    wfLoadSkin( 'chameleon' );
+}
 $wgDefaultSkin = getenv( 'MW_DEFAULT_SKIN' );
 
 # InstantCommons allows wiki to use images from http://commons.wikimedia.org
@@ -164,6 +172,13 @@ wfLoadExtension( 'CheckUser' );
 $wgGroupPermissions['sysop']['checkuser'] = true;
 $wgGroupPermissions['sysop']['checkuser-log'] = true;
 
+############### Private Wiki ######################################
+$wgGroupPermissions['*']['createaccount'] = false;
+$wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['*']['read'] = false;
+$wgGroupPermissions['user']['writeapi'] = true;
+
+
 ############### MediaWiki Language Extension Bundle ################
 wfLoadExtension( 'Babel' );
 
@@ -172,7 +187,7 @@ wfLoadExtension( 'CleanChanges' );
 
 wfLoadExtension( 'UniversalLanguageSelector' );
 
-wfLoadExtension( 'cldr' );
+#wfLoadExtension( 'cldr' );
 
 ############################ WikiEditor ############################
 wfLoadExtension( 'WikiEditor' );
@@ -214,6 +229,8 @@ if ( $tmpRestDomain && $tmpRestParsoidUrl ) {
             'domain' => $tmpRestDomain,
             // Parsoid "prefix", see below (optional)
             'prefix' => $tmpRestDomain,
+            //to use VE in private Wiki
+            'forwardCookies' => true,
     ];
 
     $tmpRestRestbaseUrl = getenv( 'MW_REST_RESTBASE_URL' );

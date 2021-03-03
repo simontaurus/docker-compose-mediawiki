@@ -25,18 +25,21 @@ RUN set -x; \
         imagemagick \
         netcat \
         git \
-        composer \
+        #composer \
         unzip \
         mysql-client \
         wget \
+        nano \
     && pear install mail net_smtp \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/cache/apt/archives/* \
     && a2enmod rewrite \
     && rm /var/www/html/index.html \
-    && rm -rf /etc/apache2/sites-enabled/*
+    && rm -rf /etc/apache2/sites-enabled/* \
+    && wget -qO composer-setup.php https://getcomposer.org/installer \
+    && php composer-setup.php --1 --install-dir=/usr/local/bin --filename=composer
 
-ENV MW_VERSION=REL1_29 \
+ENV MW_VERSION=REL1_31 \
     MW_HOME=/var/www/html/w \
     MW_VOLUME=/mediawiki \
     WWW_USER=www-data \
@@ -153,6 +156,12 @@ RUN set -x; \
     cd $MW_HOME/extensions \
     && git clone --depth 1 -b $MW_VERSION https://gerrit.wikimedia.org/r/p/mediawiki/extensions/ElectronPdfService
 
+##### composer extension
+RUN set -x; \
+    cd $MW_HOME \
+    && COMPOSER=composer.local.json composer require --no-update mediawiki/chameleon-skin:~2.0 \
+    && composer update mediawiki/chameleon-skin --no-dev -o
+
 #### Run maintenance sripts
 # Increase value for run maintenance script before web service started
 ENV MW_AUTOUPDATE=true \
@@ -160,7 +169,7 @@ ENV MW_AUTOUPDATE=true \
     MW_MAINTENANCE_CIRRUSSEARCH_UPDATECONFIG=1 \
     MW_MAINTENANCE_CIRRUSSEARCH_FORCEINDEX=1 \
     MW_MAINTENANCE_ULS_INDEXER=1 \
-    MW_SCRIPT_CLDR_REBUILD=1 \
+    #MW_SCRIPT_CLDR_REBUILD=1 \
     MW_SITE_NAME=My\ MediaWiki\ Site \
     MW_SITE_LANG=en \
     MW_DEFAULT_SKIN=vector \
