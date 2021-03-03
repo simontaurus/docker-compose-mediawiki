@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-MAINTAINER pastakhov@yandex.ru
+MAINTAINER simon.stier@gmx.de
 
 # Install requered packages
 RUN set -x; \
@@ -90,7 +90,13 @@ RUN set -x; \
     && git clone --depth 1 -b $MW_VERSION https://gerrit.wikimedia.org/r/p/mediawiki/extensions/Poem \
     && git clone --depth 1 -b $MW_VERSION https://gerrit.wikimedia.org/r/p/mediawiki/extensions/SpamBlacklist \
     && git clone --depth 1 -b $MW_VERSION https://gerrit.wikimedia.org/r/p/mediawiki/extensions/TitleBlacklist \
-    && git clone --depth 1 -b $MW_VERSION https://gerrit.wikimedia.org/r/p/mediawiki/extensions/CiteThisPage
+    && git clone --depth 1 -b $MW_VERSION https://gerrit.wikimedia.org/r/p/mediawiki/extensions/CiteThisPage \    
+    #for PdfHandler
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        poppler-utils \
+        ghostscript
+
 
 # SyntaxHighlight_GeSHi
 RUN set -x; \

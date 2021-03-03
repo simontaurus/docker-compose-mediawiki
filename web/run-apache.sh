@@ -158,6 +158,14 @@ if [ $MW_AUTOUPDATE == 'true' ]; then
     run_maintenance_script_if_needed 'maintenance_update' "$MW_VERSION-$MW_MAINTENANCE_UPDATE" \
         'maintenance/update.php --quick'
 
+    ### images
+    run_maintenance_script_if_needed 'maintenance_refreshImageMetadata' "$MW_VERSION-$MW_MAINTENANCE_UPDATE" \
+        'maintenance/refreshImageMetadata.php -f'    
+    run_maintenance_script_if_needed 'maintenance_rebuildImages' "$MW_VERSION-$MW_MAINTENANCE_UPDATE" \
+        'maintenance/rebuildImages.php'
+
+
+
     ### CirrusSearch
     if [ "$MW_SEARCH_TYPE" == 'CirrusSearch' ]; then
         run_maintenance_script_if_needed 'maintenance_CirrusSearch_updateConfig' "$MW_MAINTENANCE_CIRRUSSEARCH_UPDATECONFIG" \
