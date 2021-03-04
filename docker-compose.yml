@@ -1,8 +1,9 @@
 version: '2'
 services:
     db:
-        image: pastakhov/mysql:5.7
-        #image: mysql:8.0.17
+        #image: pastakhov/mysql:5.7
+        image: mysql:8.0.17
+        command: mysqld --default-authentication-plugin=mysql_native_password
         restart: always
         environment:
             - MYSQL_ROOT_HOST=%

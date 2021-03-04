@@ -9,7 +9,7 @@ wait_database_started ()
     fi
 
     echo "Waiting for database to start"
-    mysql=( mysql -h db -u$1 -p$2 )
+    mysql=( mysql -h db -u$1 -p$2 ) 
 
     for i in {300..0}; do
         if echo 'SELECT 1' | "${mysql[@]}" &> /dev/null; then
@@ -23,6 +23,13 @@ wait_database_started ()
         return 1
     fi
     echo 'Successfully connected to the database.'
+    #echo "Enable password auth (for mysql > 8.0): ALTER USER '$3' IDENTIFIED WITH mysql_native_password BY '$4';"
+    #if echo "ALTER USER '$3' IDENTIFIED WITH mysql_native_password BY '$4';" | "${mysql[@]}" &> /dev/null; then
+    #    echo "Success"
+    #else
+    #    echo "Error"
+    #    return 1
+    #fi
     db_started="1"
     return 0
 }
@@ -65,7 +72,7 @@ run_maintenance_script_if_needed () {
     fi
 
     if [[ "$update_info" != "$2" && -n "$2" && "${2: -1}" != '-' ]]; then
-        wait_database_started "$MW_DB_INSTALLDB_USER" "$MW_DB_INSTALLDB_PASS"
+        wait_database_started "$MW_DB_INSTALLDB_USER" "$MW_DB_INSTALLDB_PASS" "$MW_DB_USER" "$MW_DB_PASS"
         if [[ "$1" == *CirrusSearch* ]]; then wait_elasticsearch_started; fi 
 
         i=3
@@ -95,7 +102,7 @@ run_script_if_needed () {
     fi
 
     if [[ "$update_info" != "$2" && -n "$2" && "${2: -1}" != '-' ]]; then
-        wait_database_started "$MW_DB_INSTALLDB_USER" "$MW_DB_INSTALLDB_PASS"
+        wait_database_started "$MW_DB_INSTALLDB_USER" "$MW_DB_INSTALLDB_PASS" "$MW_DB_USER" "$MW_DB_PASS"
         if [[ "$1" == *CirrusSearch* ]]; then wait_elasticsearch_started; fi 
         echo "Run script: $3"
         eval $3
@@ -125,7 +132,7 @@ if [ ! -e "$MW_VOLUME/LocalSettings.php" ]; then
         fi
     done
 
-    wait_database_started $MW_DB_INSTALLDB_USER $MW_DB_INSTALLDB_PASS
+    wait_database_started $MW_DB_INSTALLDB_USER $MW_DB_INSTALLDB_PASS $MW_DB_USER $MW_DB_PASS
 
     php maintenance/install.php \
         --confpath "$MW_VOLUME" \
@@ -133,7 +140,7 @@ if [ ! -e "$MW_VOLUME/LocalSettings.php" ]; then
         --dbtype "mysql" \
         --dbname "$MW_DB_NAME" \
         --dbuser "$MW_DB_USER" \
-        --dbpass "$MW_DB_PASSWORD" \
+        --dbpass "$MW_DB_PASS" \
         --installdbuser "$MW_DB_INSTALLDB_USER" \
         --installdbpass "$MW_DB_INSTALLDB_PASS" \
         --server "$MW_SITE_SERVER" \
@@ -154,6 +161,7 @@ fi
 ########## Run maintenance scripts ##########
 if [ $MW_AUTOUPDATE == 'true' ]; then
     echo 'Check for the need to run maintenance scripts'
+    #wait_database_started "$MW_DB_INSTALLDB_USER" "$MW_DB_INSTALLDB_PASS" "$MW_DB_USER" "$MW_DB_PASS"
     ### maintenance/update.php
     run_maintenance_script_if_needed 'maintenance_update' "$MW_VERSION-$MW_MAINTENANCE_UPDATE" \
         'maintenance/update.php --quick'
