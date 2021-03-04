@@ -13,15 +13,15 @@ services:
         restart: always
         depends_on:
             - web
-            - restbase
+           # - restbase
         ports:
             - "8080:80"
         environment:
             - PROXY_BACKEND_web=web:80
-            - PROXY_BACKEND_restbase=restbase:7231
-            - PROXY_RESTBASE_BACKEND=restbase
-            - PROXY_RESTBASE_URL=^/api/rest_v1
-            - PROXY_RESTBASE_SUB=/{backend_hint}/v1
+           # - PROXY_BACKEND_restbase=restbase:7231
+           # - PROXY_RESTBASE_BACKEND=restbase
+           # - PROXY_RESTBASE_URL=^/api/rest_v1
+           # - PROXY_RESTBASE_SUB=/{backend_hint}/v1
 
     web:
         build: 
@@ -33,7 +33,7 @@ services:
             - elasticsearch
             - memcached
             - parsoid
-            - restbase
+            #- restbase
         environment:
             - MW_SITE_SERVER=https://localhost:443 #overwritten in web/CustomSettings.php
             - MW_SITE_NAME=Wiki #overwritten in web/CustomSettings.php
@@ -74,24 +74,26 @@ services:
             - PARSOID_NUM_WORKERS=0
             - PARSOID_DOMAIN_web=http://web/w/api.php
 
-    restbase:
-        image: pastakhov/restbase:0.16.9
-        restart: always
-        environment:
-            - RB_CONF_NUM_WORKERS=0
-            - RB_CONF_DOMAIN_web=http://web/w/api.php
-            - RB_CONF_PARSOID_HOST=http://parsoid:8000
-            - RB_CONF_BASE_URI_TEMPLATE=http://{domain}/api/rest_v1
-            - RB_CONF_API_URI_TEMPLATE=http://{domain}/w/api.php
-            - RB_CONF_LOGGING_LEVEL=info #trace
-            - RB_CONF_PDF_URI=http://pdf:3000
+    #restbase:
+    #    image: pastakhov/restbase:0.16.9
+    #    restart: always
+    #    environment:
+    #        - RB_CONF_NUM_WORKERS=0
+    #        - RB_CONF_DOMAIN_web=http://web/w/api.php
+    #        - RB_CONF_PARSOID_HOST=http://parsoid:8000
+    #        - RB_CONF_BASE_URI_TEMPLATE=http://{domain}/api/rest_v1
+    #        - RB_CONF_API_URI_TEMPLATE=http://{domain}/w/api.php
+    #        - RB_CONF_LOGGING_LEVEL=info #trace
+    #        - RB_CONF_PDF_URI=http://pdf:3000
 
     elasticsearch:
         image: elasticsearch:5.6
         restart: always
-
-    pdf:
-        image: msokk/electron-render-service
-        restart: always
         environment:
-            RENDERER_ACCESS_KEY: secret
+           - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
+    #pdf:
+    #    image: msokk/electron-render-service
+    #    restart: always
+    #    environment:
+    #        RENDERER_ACCESS_KEY: secret
